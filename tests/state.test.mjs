@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {sanitizeState,pinchTransform} from '../src/state.mjs';
+import {actions,tutorials} from '../src/data.mjs';import {controls} from '../src/geometry.mjs';
+const schema={actions,tutorials,controls,categories:[...new Set(actions.map(a=>a.category))]};
+test('corrupt storage cannot create invalid active tutorial step or query',()=>{const state=sanitizeState({query:{invalid:true},tutorial:'drums',step:'NaN',category:'obsolete',frequency:'bad',progress:{drums:100000}},schema);assert.equal(state.query,'');assert.equal(state.step,0);assert.equal(state.category,'all');assert.equal(state.progress.drums,tutorials.find(t=>t.id==='drums').steps.length-1);});
+test('valid search and independent tutorial progress survive roundtrip',()=>{const state=sanitizeState({query:'mute track',category:'Mixing',frequency:'all',tutorial:'mix',step:3,progress:{mix:3,drums:2},detailOpen:true},schema);assert.equal(state.query,'mute track');assert.equal(state.progress.mix,3);assert.equal(state.progress.drums,2);assert.equal(state.step,3);assert.ok(state.detailOpen);});
+test('pinch translates with midpoint while scaling anchored content',()=>{const result=pinchTransform({startCenter:{x:0,y:0},currentCenter:{x:70,y:30},startPan:{x:10,y:-10},startZoom:2,distanceRatio:1});assert.deepEqual(result,{zoom:2,pan:{x:80,y:20}});const scaled=pinchTransform({startCenter:{x:100,y:0},currentCenter:{x:120,y:0},startPan:{x:0,y:0},startZoom:1,distanceRatio:2});assert.deepEqual(scaled,{zoom:2,pan:{x:-80,y:0}});});

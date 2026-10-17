@@ -1,0 +1,23 @@
+✔ 68 physical buttons, individually identified; four encoders and three other controls (1.130595ms)
+✔ keyboard physical topology is F–E, 14 natural keys, 3–2–3–2 accidentals (1.042904ms)
+✔ every action resolves controls and evidence; ordered events never empty (4.819989ms)
+✔ each physical control maps to one or more actions, including all 4 modules and 8 tracks (6.251326ms)
+✔ Common starts with playback, excludes obscure/destructive low-priority operations (8.501061ms)
+✔ exact shortcuts, synonyms and fuzzy searches (23.86902ms)
+✔ button lookup includes Shift combinations independent of Common setting (0.74738ms)
+✔ tutorials reference existing mappings and have prerequisites (0.318778ms)
+✔ SVG unique targets, accessible labels, no invented step cap labels (0.934621ms)
+✔ touch rectangles do not overlap and all coordinates lie within the logical map (1.699218ms)
+✔ printed plus/minus names and combination targets survive normalization (10.223143ms)
+✔ natural-language wording keeps the requested operation (7.797195ms)
+✔ corrupt storage cannot create invalid active tutorial step or query (1.081553ms)
+✔ valid search and independent tutorial progress survive roundtrip (0.253551ms)
+✔ pinch translates with midpoint while scaling anchored content (1.049194ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 180.574923

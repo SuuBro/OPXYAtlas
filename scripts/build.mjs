@@ -1,0 +1,24 @@
+import {mkdir,cp,readFile,writeFile,rm,readdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {actions,tutorials,coverage,contexts} from '../src/data.mjs';
+const root=new URL('../',import.meta.url);process.chdir(root.pathname);
+await mkdir('dist',{recursive:true});
+for(const file of ['index.html','style.css','app.mjs','geometry.mjs','data.mjs','search.mjs','state.mjs','icon-192.png','icon-512.png'])await cp('src/'+file,'dist/'+file);
+await mkdir('dist/reports',{recursive:true});await cp('reports','dist/reports',{recursive:true});
+const icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="34" fill="#242628"/><text x="96" y="108" font-family="Arial,sans-serif" font-size="49" fill="#eee" text-anchor="middle">XY</text><circle cx="147" cy="47" r="10" fill="#e0493b"/></svg>';
+await writeFile('dist/icon.svg',icon);
+await writeFile('dist/manifest.webmanifest',JSON.stringify({name:'OP–XY Control Atlas',short_name:'OP–XY Atlas',start_url:'./',scope:'./',display:'standalone',background_color:'#eeede9',theme_color:'#eeede9',icons:[{src:'./icon-192.png',sizes:'192x192',type:'image/png'},{src:'./icon-512.png',sizes:'512x512',type:'image/png'}]},null,2));
+const assets=['./','./index.html','./style.css','./app.mjs','./geometry.mjs','./data.mjs','./search.mjs','./state.mjs','./icon.svg','./icon-192.png','./icon-512.png','./manifest.webmanifest'];
+const digest=createHash('sha256').update((await Promise.all(assets.filter(a=>!a.endsWith('/')).map(a=>readFile('dist/'+a.slice(2))))).map(x=>x.toString()).join('')).digest('hex').slice(0,12);
+await writeFile('dist/sw.js',`const CACHE='opxy-atlas-${digest}';const ASSETS=${JSON.stringify(assets)};self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('opxy-atlas-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).catch(()=>caches.match('./index.html')));return;}e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request)));});`);
+// A downloadable export executes only in a real browser, not iOS Quick Look.
+const moduleNames=['geometry','data','search','state','app'];const modules={};for(const name of moduleNames)modules[name]=await readFile('src/'+name+'.mjs','utf8');
+const loader=`const modules=${JSON.stringify(modules).replace(/</g,'\\u003c')};const urls={};for(const name of ['geometry','data','search','state','app']){let text=modules[name];for(const [dep,url] of Object.entries(urls))text=text.split('./'+dep+'.mjs').join(url);if(name==='app')text=text.replace("location.protocol==='https:'","false");urls[name]=URL.createObjectURL(new Blob([text],{type:'text/javascript'}));}import(urls.app);`;
+let standalone=await readFile('src/index.html','utf8');standalone=standalone.replace('<link rel="stylesheet" href="./style.css">',`<style>${await readFile('src/style.css','utf8')}</style>`).replace('<script type="module" src="./app.mjs"></script>',`<script type="module">${loader}</script>`).replace('<link rel="apple-touch-icon" href="./icon-192.png">','').replace('<link rel="manifest" href="./manifest.webmanifest">','').replace('<link rel="icon" href="./icon.svg" type="image/svg+xml">','');
+await writeFile('dist/opxy-atlas-standalone.html',standalone);
+const evidence={manualRevision:'1.2.0',checked:'2026-10-17',coverage,contexts,actions:actions.map(a=>({id:a.id,name:a.name,context:a.context,contextId:a.contextId,verification:a.verification,sources:a.sources})),tutorials};
+await writeFile('dist/reports/documentation-evidence.json',JSON.stringify(evidence,null,2));
+await rm('dist/source.zip',{force:true});
+execFileSync('zip',['-qr','dist/source.zip','src','scripts','tests','reports','README.md','package.json','playwright.config.mjs','.gitignore']);
+console.log(JSON.stringify({actions:actions.length,tutorials:tutorials.length,cache:digest,output:'dist',browserVerified:false}));
