@@ -13,7 +13,7 @@ Date: 17 October 2026. Official live guide: v1.2.0.
 
 ## Evidence that was executed
 
-- 15 passing Node data integrity, mapping coverage, geometry, search and retained-state regression tests.
+- 17 passing Node data integrity, mapping coverage, geometry, search and retained-state regression tests.
 - JavaScript syntax checks.
 - Independent documentation/source reviews and corrective iterations.
 - Standalone SVG render compared with official hardware photograph. This verifies diagram geometry only; it is not a browser screenshot.
@@ -31,3 +31,7 @@ The managed environment did not expose the supported browser-control skill. Its 
 - Vector glyphs are approximations. The screen is a reference placeholder, not a simulated hardware screen.
 - Full-device mobile scale cannot provide 44px targets for all 68 physical keys without rearranging hardware. Touch first zooms a region; the select picker offers full-size alternatives. Real-touch validation remains outstanding.
 - Full acceptance criteria requiring browser/physical tests and zero actionable findings across the entire specification are not claimed as passed.
+
+## Mobile visual refinement
+
+The refined interface uses a fixed mobile viewport with separate instrument and content regions, dedicated scroll areas, a larger hardware view, expandable/swipeable instructions, retained search layout through result activation, keyboard-aware sizing, readable secondary text and accessible mobile evidence access. The first source review findings and fixes are recorded in `mobile-polish-review.md`. Two additional Node checks cover text contrast and accessible control names. Browser screenshot and physical-touch limitations remain unchanged.
